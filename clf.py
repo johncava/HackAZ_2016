@@ -64,6 +64,7 @@ def multi_key_experiment(window_size_ms, clf, train_time_sec, n_keys=3):
 
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 import sys
 if __name__ == '__main__':
 	window_size_ms = 500
@@ -77,7 +78,7 @@ if __name__ == '__main__':
 		n_keys = int(sys.argv[3])
 
 
-	clf = DecisionTreeClassifier()
+	clf = RandomForestClassifier()
 
 	print "Training time for each key is {} seconds".format(training_time)
 	#single_key_experiment(window_size_ms, LinearSVC(), training_time)
