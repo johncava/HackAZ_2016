@@ -1,7 +1,6 @@
 import pyaudio
-import wave
-import thread
 import numpy as np
+
 def input_thread(list):
     raw_input()
     list.append(None)
@@ -63,17 +62,18 @@ def read_frames_from_mic(nframes, rate):
 
 #Records from default recording device for time_ms
 def record_for_time(time_ms):
-	rate = 44100 #sampling rates in hertz
+    rate = 44100 #sampling rates in hertz
 
-	frames = time_ms * rate // 1000
-	#the raw bytes for the data stream
-	return read_frames_from_mic(frames, rate)
+    frames = time_ms * rate // 1000
+    #the raw bytes for the data stream
+    return read_frames_from_mic(frames, rate)
 
 #records for a specified time and converts the spectral reading for that interval
 def read_spectral_data_for_time(time_ms):
-	raw_data = record_for_time(time_ms)
-	t = np.fromstring(raw_data, 'Int16')
-	freq_sig = np.abs(np.fft.fft(t))
-	return freq_sig
+    raw_data = record_for_time(time_ms)
+    t = np.fromstring(raw_data, 'Int16')
+    freq_sig = np.abs(np.fft.fft(t))
+    return freq_sig
+
 if __name__ == '__main__':
-	print read_spectral_data_for_time(500)
+    print read_spectral_data_for_time(500)

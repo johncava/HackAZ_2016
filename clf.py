@@ -1,6 +1,13 @@
 #contains all classification routines
-
+import numpy as np
 from audio import read_spectral_data_for_time
+from multiprocessing import Queue
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+import sys
 
 
 def single_key_experiment(window_size_ms, clf, train_time_sec):
@@ -27,22 +34,45 @@ def single_key_experiment(window_size_ms, clf, train_time_sec):
 		_label = clf.predict([freq_spect])
 		print 'Predicting class {}'.format(_label[0])
 
+note_buffer = Queue()
 
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.preprocessing import MultiLabelBinarizer
+def listen(clf, mb, window_size_ms):
+	while True:
+		freq_spect = read_spectral_data_for_time(window_size_ms)
+		_label = clf.predict([freq_spect])
+		current_notes = mb.inverse_transform(_label)[0]
+		for note in current_notes:
+			note_buffer.put(note)
+		print str(current_notes)
 
-import numpy as np
+def listen_single(clf, mb, window_size_ms):
+	freq_spect = read_spectral_data_for_time(window_size_ms)
+	_label = clf.predict([freq_spect])
+	current_notes = mb.inverse_transform(_label)[0]
+	return current_notes
+"""
+INPUT:
+window_size_ms - the sampling window size in ms
+train_time_sec - the number of seconds spent on training each key
+clf - The classifier which to train (Optional)
+n_keys - The number of keys to train.
 
-def multi_key_experiment(window_size_ms, clf, train_time_sec, n_keys=3):
+OUTPUT:
+The trained classifier and the MultiLabelBinarizer
+
+Routine Description:
+Trains a classifier and returns the trained classifier and the multilabelbinarizer needed to convert the sparse labels to tuples
+"""
+def train(window_size_ms, train_time_sec=30, clf = OneVsRestClassifier(DecisionTreeClassifier()), n_keys=2):
 	#loop until empty input is detected
 	X = []
 	y = []
 	labels = [(i,) for i in range(n_keys+1)]
 
-
 	mb = MultiLabelBinarizer()
 	labels = mb.fit_transform(labels)
 
+	print "Training time for each key is {} seconds".format(train_time_sec)
 	for label_num, label in enumerate(labels):
 		raw_input('Press <enter> to begin training key {}'.format(label_num))
 		i = 0
@@ -55,33 +85,20 @@ def multi_key_experiment(window_size_ms, clf, train_time_sec, n_keys=3):
 	X = np.asarray(X)
 	y = np.asarray(y)
 	clf.fit(X, y)
+	return (clf, mb)
 
-	while True:
-		freq_spect = read_spectral_data_for_time(window_size_ms)
-		_label = clf.predict([freq_spect])
-		print 'Predicting classes {}'.format(mb.inverse_transform(_label)[0])
-
-
-from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-import sys
+import time
 if __name__ == '__main__':
-	window_size_ms = 500
-	training_time = 30
-	n_keys = 3
+	window_size_ms = 75
+	kwargs = {}
 	if len(sys.argv) > 1:
 		window_size_ms = int(sys.argv[1])
 	if len(sys.argv) > 2:
-		training_time = int(sys.argv[2])
+		kwargs['train_time_sec'] = int(sys.argv[2])
 	if len(sys.argv) > 3:
-		n_keys = int(sys.argv[3])
+		kwargs['n_keys'] = int(sys.argv[3])
 
-
-	clf = RandomForestClassifier()
-
-	print "Training time for each key is {} seconds".format(training_time)
-	#single_key_experiment(window_size_ms, LinearSVC(), training_time)
-	multi_key_experiment(window_size_ms, OneVsRestClassifier(clf), training_time, n_keys=n_keys)
-
-
+	clf, mp = train(window_size_ms, **kwargs)
+	
+	while True:
+		print listen_single(clf, mp, window_size_ms) 
