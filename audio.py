@@ -69,5 +69,11 @@ def record_for_time(time_ms):
 	#the raw bytes for the data stream
 	return read_frames_from_mic(frames, rate)
 
+#records for a specified time and converts the spectral reading for that interval
+def read_spectral_data_for_time(time_ms):
+	raw_data = record_for_time(time_ms)
+	t = np.fromstring(raw_data, 'Int16')
+	freq_sig = np.abs(np.fft.fft(t))
+	return freq_sig
 if __name__ == '__main__':
-	print len(np.fromstring(record_for_time(500), 'Int16'))
+	print read_spectral_data_for_time(500)
