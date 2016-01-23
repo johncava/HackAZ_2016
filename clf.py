@@ -5,14 +5,14 @@ from audio import read_spectral_data_for_time
 
 def single_key_experiment(window_size_ms, clf, train_time_sec):
 	#loop until empty input is detected
+	X = []
+	y = []
 	while True:
 		#the key I will press
 		key = raw_input('Label num:')
 		if not key: break
 
 		i = 0
-		X = []
-		y = []
 		while i < train_time_sec:
 			i += (window_size_ms / float(1000))
 			freq_spect = read_spectral_data_for_time(windows_size_ms)
