@@ -1,19 +1,13 @@
 import pyaudio
 import wave
 import thread
-
+import numpy as np
 def input_thread(list):
     raw_input()
     list.append(None)
 
-def record():
-    list = []
-    thread.start_new_thread(input_thread, (list,))
-    while not list:
-        data = stream.read(CHUNK)
-        frames.append(data)
         
-
+"""
 CHUNK = 1024 
 FORMAT = pyaudio.paInt16 #paInt8
 CHANNELS = 2 
@@ -49,26 +43,31 @@ wf.writeframes(b''.join(frames))
 wf.close()
 
 """
-def read_frames_from_mic(nframes):
-    CHUNK = 1024 
+def read_frames_from_mic(nframes, rate):
     FORMAT = pyaudio.paInt16 #paInt8
     CHANNELS = 1 
-    RATE = 44100 #sample rate
+    CHUNK = 1024
     #WAVE_OUTPUT_FILENAME = "sounds/output.wav"
     
     p = pyaudio.PyAudio()
     
     stream = p.open(format=FORMAT,
                 channels=CHANNELS,
-                rate=RATE,
+                rate=rate,
                 input=True,
                 frames_per_buffer=CHUNK)
     
     res =  stream.read(nframes)
     stream.close()
     return res
-import numpy as np
 
-    
-print np.fromstring(read_frames_from_mic(100), 'Int16')
-"""
+#Records from default recording device for time_ms
+def record_for_time(time_ms):
+	rate = 44100 #sampling rates in hertz
+
+	frames = time_ms * rate // 1000
+	#the raw bytes for the data stream
+	return read_frames_from_mic(frames, rate)
+
+if __name__ == '__main__':
+	print len(np.fromstring(record_for_time(500), 'Int16'))
