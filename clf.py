@@ -31,27 +31,35 @@ def single_key_experiment(window_size_ms, clf, train_time_sec):
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
 
+import numpy as np
+
 def multi_key_experiment(window_size_ms, clf, train_time_sec, n_keys=3):
 	#loop until empty input is detected
 	X = []
-	y = [[i] for i in range(n_keys+1)]
+	y = []
+	labels = [(i,) for i in range(n_keys+1)]
 
-	y = MultiLabelBinarizer().fit_transform(y)
 
-	for label_num, label in enumerate(y):
+	mb = MultiLabelBinarizer()
+	labels = mb.fit_transform(labels)
+
+	for label_num, label in enumerate(labels):
 		raw_input('Press <enter> to begin training key {}'.format(label_num))
 		i = 0
 		while i < train_time_sec:
 			i += (window_size_ms / float(1000))
 			freq_spect = read_spectral_data_for_time(window_size_ms)
 			X.append(freq_spect)
+			y.append(label)
 
+	X = np.asarray(X)
+	y = np.asarray(y)
 	clf.fit(X, y)
 
 	while True:
 		freq_spect = read_spectral_data_for_time(window_size_ms)
 		_label = clf.predict([freq_spect])
-		print 'Predicting classes {}'.format(', '.join(x for x in _label[0]))
+		print 'Predicting classes {}'.format(mb.inverse_transform(_label)[0])
 
 
 from sklearn.svm import LinearSVC
@@ -69,6 +77,6 @@ if __name__ == '__main__':
 
 	print "Training time for each key is {} seconds".format(training_time)
 	#single_key_experiment(window_size_ms, LinearSVC(), training_time)
-	multi_key_experiment(window_size_ms, LinearSVC(), training_time)
+	multi_key_experiment(window_size_ms, OneVsRestClassifier(LinearSVC()), training_time)
 
 
