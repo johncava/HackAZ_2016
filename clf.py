@@ -1,6 +1,7 @@
 #contains all classification routines
 
 from audio import read_spectral_data_for_time
+from multiprocessing import Queue
 
 
 def single_key_experiment(window_size_ms, clf, train_time_sec):
@@ -30,8 +31,14 @@ def single_key_experiment(window_size_ms, clf, train_time_sec):
 
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+import sys
 
 import numpy as np
+
+note_buffer = Queue()
+clf = DecisionTreeClassifier()
 
 def multi_key_experiment(window_size_ms, clf, train_time_sec, n_keys=3):
 	#loop until empty input is detected
@@ -55,20 +62,25 @@ def multi_key_experiment(window_size_ms, clf, train_time_sec, n_keys=3):
 	X = np.asarray(X)
 	y = np.asarray(y)
 	clf.fit(X, y)
+	
+	return mb
 
+window_size_ms = 500
+training_time = 30
+n_keys = 3
+
+def listen(mb):
 	while True:
 		freq_spect = read_spectral_data_for_time(window_size_ms)
 		_label = clf.predict([freq_spect])
-		print 'Predicting classes {}'.format(mb.inverse_transform(_label)[0])
+		current_notes = mb.inverse_transform(_label)[0]
+		note_buffer.put(current_notes)
+		print str(current_notes)
 
+def train():
+	return multi_key_experiment(window_size_ms, OneVsRestClassifier(clf), training_time, n_keys=n_keys)
 
-from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier
-import sys
-if __name__ == '__main__':
-	window_size_ms = 500
-	training_time = 30
-	n_keys = 3
+def main():
 	if len(sys.argv) > 1:
 		window_size_ms = int(sys.argv[1])
 	if len(sys.argv) > 2:
@@ -77,10 +89,9 @@ if __name__ == '__main__':
 		n_keys = int(sys.argv[3])
 
 
-	clf = DecisionTreeClassifier()
-
 	print "Training time for each key is {} seconds".format(training_time)
 	#single_key_experiment(window_size_ms, LinearSVC(), training_time)
-	multi_key_experiment(window_size_ms, OneVsRestClassifier(clf), training_time, n_keys=n_keys)
+	train()
 
-
+if __name__ == '__main__':
+	main()
