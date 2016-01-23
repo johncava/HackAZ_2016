@@ -15,7 +15,7 @@ def single_key_experiment(window_size_ms, clf, train_time_sec):
 		i = 0
 		while i < train_time_sec:
 			i += (window_size_ms / float(1000))
-			freq_spect = read_spectral_data_for_time(windows_size_ms)
+			freq_spect = read_spectral_data_for_time(window_size_ms)
 			X.append(freq_spect)
 			y.append(key)
 
