@@ -67,16 +67,19 @@ import sys
 if __name__ == '__main__':
 	window_size_ms = 500
 	training_time = 30
+	n_keys = 3
 	if len(sys.argv) > 1:
 		window_size_ms = int(sys.argv[1])
 	if len(sys.argv) > 2:
 		training_time = int(sys.argv[2])
-	
+	if len(sys.argv) > 3:
+		n_keys = int(sys.argv[3])
+
 
 	clf = LinearSVC()
 
 	print "Training time for each key is {} seconds".format(training_time)
 	#single_key_experiment(window_size_ms, LinearSVC(), training_time)
-	multi_key_experiment(window_size_ms, OneVsRestClassifier(LinearSVC()), training_time)
+	multi_key_experiment(window_size_ms, OneVsRestClassifier(LinearSVC()), training_time, n_keys=n_keys)
 
 
