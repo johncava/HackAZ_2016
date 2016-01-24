@@ -53,10 +53,10 @@ plot_buffer = Queue.Queue()
 def update_plots(time_domain, freq_spect):
 	#we have our data, we can plot it if we want
 	plt.clf()
-	plt.subplot(211)
+	#plt.subplot(211)
 	plt.plot(freq_spect)
-	plt.subplot(212)
-	plt.plot(time_domain)
+	#plt.subplot(212)
+	#plt.plot(time_domain)
 	plt.draw()
 
 def listen_single(clf, mb, window_size_ms):

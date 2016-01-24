@@ -80,7 +80,7 @@ class ReaderDisplay(Canvas):
             return True
         else:
             latest_note_time = self.notes[-1].time
-            for note in self.notes.reverse():
+            for note in self.notes[len(self.notes) - 1:-1:-1]:
                 if note.time != latest_note_time:
                     return False
                 elif not note.value in note_values:
@@ -124,10 +124,10 @@ class MainWindow(Frame):
         reader_display.pack(fill=BOTH, expand=1)
 
 def init_plots():
-	#start matplotlib plots
-	t = range(10)
-	plt.plot(t, t)
-	plt.show(block=False)
+    #start matplotlib plots
+    t = range(10)
+    plt.plot(t, t)
+    plt.show(block=False)
 
 def main():
     note_sample_window_size = 75
@@ -141,11 +141,12 @@ def main():
     if len(sys.argv) > 3:
         number_of_keys = int(sys.argv[3])
 
+    #initialize matplotlib plots
+    init_plots()
+
     # first, run the training function
     (clf, mb) = train(note_sample_window_size, train_time_sec=training_time, n_keys=number_of_keys)
     
-    #initialize matplotlib plots
-    init_plots()
 
     root = Tk()
     root.geometry("1000x400")
