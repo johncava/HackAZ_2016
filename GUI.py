@@ -135,12 +135,12 @@ def main():
     if len(sys.argv) > 3:
         number_of_keys = int(sys.argv[3])
 
-    #initialize matplotlib plots
-    init_plots()
 
     # first, run the training function
     (clf, mb) = train(note_sample_window_size, train_time_sec=training_time, n_keys=number_of_keys)
     
+    #initialize matplotlib plots
+    init_plots()
 
     root = Tk()
     root.geometry("1000x400")
