@@ -75,5 +75,11 @@ def read_spectral_data_for_time(time_ms):
     freq_sig = np.abs(np.fft.fft(t))
     return freq_sig
 
+def read_temporal_spectral_data_for_time(time_ms):
+    raw_data = record_for_time(time_ms)
+    t = np.fromstring(raw_data, 'Int16')
+    freq_sig = np.abs(np.fft.fft(t))
+    return t, freq_sig
+
 if __name__ == '__main__':
     print read_spectral_data_for_time(500)
