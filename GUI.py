@@ -29,13 +29,11 @@ class ReaderDisplay(Canvas):
     def __init__(self, parent, clf, mb, note_sample_window_size):
         Canvas.__init__(self, parent, bg="#FFFFFF", width = self.WIDTH, height = self.HEIGHT)
         
-        
         self.notes = []
         self.last_note_set = ()
         self.clf = clf
         self.mb = mb
         self.note_sample_window_size = note_sample_window_size
-        
         
         self.render_staff()
         self.after(ReaderDisplay.UPDATE_INTERVAL, self.update_staff)
@@ -55,7 +53,7 @@ class ReaderDisplay(Canvas):
 
         for note in self.notes:
             center_x = round(int(self.WIDTH) - ((note.time + 0.5) * Note.NOTE_WIDTH * ReaderDisplay.NOTE_WIDTHS_PER_UPDATE))
-            center_y = 2.5 * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET + (Note.B3_VALUE - note.value) * Note.NOTE_WIDTH / 2.0
+            center_y = 3.0 * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET + (Note.B3_VALUE - note.value) * Note.NOTE_WIDTH / 2.0
             
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y - Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y + Note.NOTE_WIDTH / 2 + 1)
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y + Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y - Note.NOTE_WIDTH / 2 - 1)
