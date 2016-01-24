@@ -1,6 +1,6 @@
 #contains all classification routines
 import numpy as np
-from audio import read_spectral_data_for_time
+from audio import read_spectral_data_for_time, read_temporal_spectral_data_for_time
 import multiprocessing
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -52,11 +52,14 @@ plotting_enabled = False
 plot_buffer = Queue.Queue()
 
 def listen_single(clf, mb, window_size_ms):
-	freq_spect = read_spectral_data_for_time(window_size_ms)
+	time_domain, freq_spect = read_temporal_spectral_data_for_time(window_size_ms)
 	#we have our data, we can plot it if we want
 	if plotting_enabled:
 		plt.clf()
+		plt.subplot(211)
 		plt.plot(freq_spect)
+		plt.subplot(212)
+		plt.plot(time_domain)
 		plt.draw()
 
 	_label = clf.predict([freq_spect])
@@ -127,6 +130,8 @@ if __name__ == '__main__':
 	clf, mp = train(window_size_ms, **kwargs)
 
 	plotting_enabled = True
+	t = range(10)
+	plt.plot(t, t)
 	plt.show(block=False)
 
 	while True:
