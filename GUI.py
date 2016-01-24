@@ -38,6 +38,7 @@ class ReaderDisplay(Canvas):
         self.bclef = PhotoImage(file="./images/bclef.gif", master=self)
 
         print self.tclef
+        self.last_note_set = ()
         self.notes = []
         self.clf = clf
         self.mb = mb
@@ -118,7 +119,7 @@ class ReaderDisplay(Canvas):
 
         self.render_staff()
 
-        self.latest_note_time = note_values
+        self.last_note_set = note_values
 
         self.after(ReaderDisplay.UPDATE_INTERVAL, self.update_staff)
 
@@ -135,12 +136,6 @@ class MainWindow(Frame):
         reader_display = ReaderDisplay(self, clf, mb, note_sample_window_size)
         reader_display.pack(fill=BOTH, expand=1)
 
-def init_plots():
-	#start matplotlib plots
-	t = range(10)
-	plt.plot(t, t)
-	plt.show(block=False)
-
 def main():
     note_sample_window_size = 75
     training_time = 10
@@ -155,9 +150,6 @@ def main():
 
     # first, run the training function
     (clf, mb) = train(note_sample_window_size, train_time_sec=training_time, n_keys=number_of_keys)
-
-    #initialize matplotlib plots
-    init_plots()
 
     root = Tk()
     root.geometry("1000x400")

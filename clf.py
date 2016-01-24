@@ -76,12 +76,12 @@ class SignalPlot(object):
 		plot_helper = threading.Thread(target=plot_worker)
 		plot_helper.start()
 
-sig_plot = SignalPlot()
+#sig_plot = SignalPlot()
 
 def listen_single(clf, mb, window_size_ms):
 	time_domain, freq_spect = read_temporal_spectral_data_for_time(window_size_ms)
 
-	sig_plot.plot_buffer.put((time_domain, freq_spect))
+	#sig_plot.plot_buffer.put((time_domain, freq_spect))
 	_label = clf.predict([freq_spect])
 	current_notes = mb.inverse_transform(_label)[0]
 	return current_notes
