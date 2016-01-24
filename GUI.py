@@ -31,6 +31,7 @@ class ReaderDisplay(Canvas):
         
         
         self.notes = []
+        self.last_note_set = ()
         self.clf = clf
         self.mb = mb
         self.note_sample_window_size = note_sample_window_size
@@ -54,7 +55,7 @@ class ReaderDisplay(Canvas):
 
         for note in self.notes:
             center_x = round(int(self.WIDTH) - ((note.time + 0.5) * Note.NOTE_WIDTH * ReaderDisplay.NOTE_WIDTHS_PER_UPDATE))
-            center_y = 2.5 * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET + (note.value - Note.B3_VALUE) * Note.NOTE_WIDTH / 2.0
+            center_y = 2.5 * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET + (Note.B3_VALUE - note.value) * Note.NOTE_WIDTH / 2.0
             
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y - Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y + Note.NOTE_WIDTH / 2 + 1)
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y + Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y - Note.NOTE_WIDTH / 2 - 1)
@@ -67,15 +68,10 @@ class ReaderDisplay(Canvas):
             return True
         
         # if this note's values are not a subset of previous set of notes, it's a new note
-        if len(self.notes) == 0:
-            return True
-        else:
-            latest_note_time = self.notes[-1].time
-            for note in self.notes[len(self.notes) - 1:-1:-1]:
-                if note.time != latest_note_time:
-                    return False
-                elif not note.value in note_values:
-                    return True
+        for note_value in note_values:
+            if not note_value in self.last_note_set:
+                return True
+        return False
     
     def is_note_continuation(self, note_values):
         # empty tuples represent no baseline, but undefined notes; these are usually notes
@@ -85,7 +81,7 @@ class ReaderDisplay(Canvas):
         elif 0 in note_values:
             return False
         else:
-            return not self.is_new_note()
+            return not self.is_new_note(note_values)
 
     def update_staff(self):
         note_values = listen_single(self.clf, self.mb, self.note_sample_window_size)
@@ -94,11 +90,13 @@ class ReaderDisplay(Canvas):
         for note in self.notes:
             note.time += 1
         
-        if self.is_new_note(note_values):
+        if self.is_new_note(note_values) and not self.is_note_continuation(note_values):
             for note_value in note_values:
                 self.notes.append(Note(note_value))
 
         self.render_staff()
+        
+        self.last_note_set = note_values
         
         self.after(ReaderDisplay.UPDATE_INTERVAL, self.update_staff)
         
