@@ -35,7 +35,7 @@ class ReaderDisplay(Canvas):
     def create_lines(self,LR_margin, top_margin):
         for i in xrange(5):
             y = i * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET
-            self.create_line(LR_margin, y + top_margin, self.WIDTH - LR_margin, y + top_margin)
+            self.create_line(LR_margin, y + top_margin, self.winfo_width(), y + top_margin)
         
     def render_staff(self):
         # TODO TEMP
@@ -43,14 +43,15 @@ class ReaderDisplay(Canvas):
         
         self.delete("all")
         
-        self.create_lines(self.LR_OFFSET, self.TOP_OFFSET)
+        self.create_lines(self.LR_OFFSET, self.winfo_height()/2 - 50)
         # TODO TEMP
         #if len(self.notes) == 0 or self.notes[-1].time % 3 == 0:
         #    self.notes.append(Note(Note.B3_VALUE))
         
         for note in self.notes:
             center_x = round(int(self.WIDTH) - ((note.time + 0.5) * Note.NOTE_WIDTH * ReaderDisplay.NOTE_WIDTHS_PER_UPDATE))
-            center_y = self.TOP_OFFSET + (5 + note.value - Note.B3_VALUE)  * Note.NOTE_WIDTH / 2
+            #TO DO RENAME PORTION OF THE CENTER_Y OFFSET AS A SCALE OFFSET
+            center_y = 70 + (self.winfo_height()/2) - self.TOP_OFFSET + (5 + note.value - Note.B3_VALUE)  * Note.NOTE_WIDTH / 2
             
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y - Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y + Note.NOTE_WIDTH / 2 + 1)
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y + Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y - Note.NOTE_WIDTH / 2 - 1)
@@ -108,10 +109,7 @@ class MainWindow(Frame):
         self.pack(fill=BOTH, expand=1)
         
         reader_display = ReaderDisplay(self)
-        reader_display.grid(columnspan=4, padx = 125, pady = 125)
-        
-        quit_button = Button(self, text="Quit", command=self.quit)
-        quit_button.grid(row=3, column=5, rowspan=1, columnspan=1)
+        reader_display.pack(fill=BOTH, expand=1)
 
 def main():
     # first, run the training function
@@ -123,7 +121,11 @@ def main():
     
     root = Tk()
     root.geometry("1000x400")
-    MainWindow(root)
+    app = MainWindow(root)
+    menubar = Menu(root)
+    menubar.add_command(label="Quit", command=root.quit)
+    # display the menu
+    root.config(menu=menubar)
     root.mainloop()
 
 if __name__ == '__main__':
