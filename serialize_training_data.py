@@ -1,4 +1,4 @@
-from audio import read_spectral_data_for_time, read_temporal_spectral_data_for_time
+from audio import read_spectral_data_for_time
 from sklearn.preprocessing import MultiLabelBinarizer
 import numpy as np
 import sys
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
 	if len(sys.argv) < 2:
 		print 'Usage: <script-name> <output-filename>'
-		sys.exit
+		sys.exit()
 
 	outfile = sys.argv[1]
 	window_size_ms = 75
