@@ -37,17 +37,14 @@ def get_training_data(window_size_ms, train_time_sec=30):
 import time, threading, sys, pickle
 if __name__ == '__main__':
 
-	if len(sys.argv) < 2:
-		print 'Usage: <script-name> <output-filename>'
+	if len(sys.argv) < 4:
+		print 'Usage: <script-name><window-size-ms><train-time-sec><output-filename>'
 		sys.exit()
 
-	outfile = sys.argv[1]
-	window_size_ms = 75
+	outfile = sys.argv[3]
 	kwargs = {}
-	if len(sys.argv) > 1:
-		window_size_ms = int(sys.argv[1])
-	if len(sys.argv) > 2:
-		kwargs['train_time_sec'] = int(sys.argv[2])
+	window_size_ms = int(sys.argv[1])
+	kwargs['train_time_sec'] = int(sys.argv[2])
 
 	X, y = get_training_data(window_size_ms, **kwargs)
 
