@@ -122,6 +122,12 @@ class MainWindow(Frame):
         reader_display = ReaderDisplay(self, clf, mb, note_sample_window_size)
         reader_display.pack(fill=BOTH, expand=1)
 
+def init_plots():
+	#start matplotlib plots
+	t = range(10)
+	plt.plot(t, t)
+	plt.show(block=False)
+
 def main():
     note_sample_window_size = 75
     training_time = 10
@@ -137,6 +143,9 @@ def main():
     # first, run the training function
     (clf, mb) = train(note_sample_window_size, train_time_sec=training_time, n_keys=number_of_keys)
     
+    #initialize matplotlib plots
+    init_plots()
+
     root = Tk()
     root.geometry("1000x400")
     MainWindow(root, clf, mb, note_sample_window_size)

@@ -48,20 +48,21 @@ def listen(clf, mb, window_size_ms):
 import matplotlib.pyplot as plt
 import Queue
 
-plotting_enabled = False
 plot_buffer = Queue.Queue()
+
+def update_plots(time_domain, freq_spect):
+	#we have our data, we can plot it if we want
+	plt.clf()
+	plt.subplot(211)
+	plt.plot(freq_spect)
+	plt.subplot(212)
+	plt.plot(time_domain)
+	plt.draw()
 
 def listen_single(clf, mb, window_size_ms):
 	time_domain, freq_spect = read_temporal_spectral_data_for_time(window_size_ms)
-	#we have our data, we can plot it if we want
-	if plotting_enabled:
-		plt.clf()
-		plt.subplot(211)
-		plt.plot(freq_spect)
-		plt.subplot(212)
-		plt.plot(time_domain)
-		plt.draw()
 
+	update_plots(time_domain, freq_spect)
 	_label = clf.predict([freq_spect])
 	current_notes = mb.inverse_transform(_label)[0]
 	return current_notes
@@ -129,7 +130,6 @@ if __name__ == '__main__':
 
 	clf, mp = train(window_size_ms, **kwargs)
 
-	plotting_enabled = True
 	t = range(10)
 	plt.plot(t, t)
 	plt.show(block=False)
