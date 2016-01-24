@@ -7,7 +7,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-import sys
+import sys, Queue
 
 
 def single_key_experiment(window_size_ms, clf, train_time_sec):
@@ -46,23 +46,36 @@ def listen(clf, mb, window_size_ms):
 		print str(current_notes)
 
 import matplotlib.pyplot as plt
+import threading
+import time
+def plot_worker():
+	PLOT_REFRESH = 0.5 #500 ms.
 
-import Queue
+	while True:
+		time.sleep(PLOT_REFRESH)
+		if not sig_plot.plot_buffer.empty():
+			(t, freq) = sig_plot.plot_buffer.get()
 
-plot_buffer = Queue.Queue()
+			#empty queue
+			while not sig_plot.plot_buffer.empty():
+				sig_plot.plot_buffer.get()
+
+			plt.clf()
+			plt.subplot(211)
+			plt.plot(t)
+			plt.subplot(212)
+			plt.plot(freq)
+			plt.draw()
+			
 
 class SignalPlot(object):
 	def __init__(self):
 		plt.ion()
 		plt.show(block=False)
+		self.plot_buffer = Queue.LifoQueue()
+		plot_helper = threading.Thread(target=plot_worker)
+		plot_helper.start()
 
-	def update(self, time, freq):
-		plt.clf()
-		plt.subplot(211)
-		plt.plot(time)
-		plt.subplot(212)
-		plt.plot(freq)
-		plt.draw()
 sig_plot = SignalPlot()
 
 def listen_single(clf, mb, window_size_ms):
@@ -73,18 +86,6 @@ def listen_single(clf, mb, window_size_ms):
 	current_notes = mb.inverse_transform(_label)[0]
 	return current_notes
 
-import time
-def plot_worker():
-	PLOT_REFRESH = 0.01 #10 ms.
-	while True:
-		time.sleep(PLOT_REFRESH)
-		if not plot_buffer.empty():
-			freq_sig = plot_buffer.get()
-			plt.figure(1)
-			plt.clf()
-			#plt.subplot(211)
-			plt.plot(freq_sig)
-			plt.draw()
 		
 """
 INPUT:
@@ -135,7 +136,6 @@ if __name__ == '__main__':
 		kwargs['n_keys'] = int(sys.argv[3])
 
 	clf, mp = train(window_size_ms, **kwargs)
-
 
 def init_plots():
 	while True:

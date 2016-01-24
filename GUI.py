@@ -3,16 +3,18 @@ Created on Jan 23, 2016
 
 @author: connor
 '''
-from Tkinter import Tk, Frame, Canvas, Menu, BOTH
+from Tkinter import *
 from clf import train, listen_single
 import sys
+from sklearn.multiclass import OneVsRestClassifier
+import matplotlib.pyplot as plt
 
 LOOP_INTERVAL = 10
 
 class Note():
     B3_VALUE = 1   # the numerical value representing B in the 3rd octave (right below "middle C")
     NOTE_WIDTH = 15 # pixels
-    
+
     def __init__(self, value, time=0):
         self.value = value
         self.time = time
@@ -22,14 +24,21 @@ class ReaderDisplay(Canvas):
     STAFF_OFFSET = 15 # pixels; the number of pixels between the top staff line and the top of the canvas
     WIDTH = 1000
     HEIGHT = 400
-    TOP_OFFSET = 130
+    TOP_OFFSET = 50
     LR_OFFSET = 0
-    
+    MIN = 100
+    T_STAFF_OFFSET = 150
+    B_STAFF_OFFSET = 0
+
     def __init__(self, parent, clf, mb, note_sample_window_size):
         Canvas.__init__(self, parent, bg="#FFFFFF", width = self.WIDTH, height = self.HEIGHT)
-        
-        self.notes = []
+
+        self.tclef = PhotoImage(file="./images/tclef.gif", master=self)
+        self.bclef = PhotoImage(file="./images/bclef.gif", master=self)
+
+        print self.tclef
         self.last_note_set = ()
+        self.notes = []
         self.clf = clf
         self.mb = mb
         self.note_sample_window_size = note_sample_window_size
@@ -47,13 +56,13 @@ class ReaderDisplay(Canvas):
             return False
         elif len(self.notes) == 0:
             return True
-        
+
         # if this note's values are not a subset of previous set of notes, it's a new note
         for note_value in note_values:
-            if not note_value in self.last_note_set:
+            if not note_values in self.last_note_set:
                 return True
         return False
-    
+
     def is_note_continuation(self, note_values):
         # empty tuples represent no baseline, but undefined notes; these are usually notes
         # that are dropping off, especially from chords, so consider it a continuation
@@ -95,25 +104,24 @@ class ReaderDisplay(Canvas):
         self.last_note_set = note_values
         
         self.after(1, self.update_staff)
-        
 
 class MainWindow(Frame):
     def __init__(self, parent, clf, mb, note_sample_window_size):
+
         Frame.__init__(self, parent)
-        
+
         self.parent = parent
         self.parent.title("Music Reader")
         self.pack(fill=BOTH, expand=1)
-        
+
         reader_display = ReaderDisplay(self, clf, mb, note_sample_window_size)
         reader_display.pack(fill=BOTH, expand=1)
-
 
 def main():
     note_sample_window_size = 75
     training_time = 10
     number_of_keys = 4
-    
+
     if len(sys.argv) > 1:
         note_sample_window_size = int(sys.argv[1])
     if len(sys.argv) > 2:
@@ -123,7 +131,7 @@ def main():
 
     # first, run the training function
     (clf, mb) = train(note_sample_window_size, train_time_sec=training_time, n_keys=number_of_keys)
-    
+
     root = Tk()
     root.geometry("1000x400")
     MainWindow(root, clf, mb, note_sample_window_size)
