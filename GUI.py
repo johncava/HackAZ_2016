@@ -4,7 +4,7 @@ Created on Jan 23, 2016
 @author: connor
 '''
 from Tkinter import Tk, Frame, Canvas, Menu, BOTH
-from clf import train, listen_single, init_plots
+from clf import train, listen_single
 import sys
 
 LOOP_INTERVAL = 10
@@ -130,9 +130,6 @@ def main():
     # first, run the training function
     (clf, mb) = train(note_sample_window_size, train_time_sec=training_time, n_keys=number_of_keys)
     
-    #initialize matplotlib plots
-    init_plots()
-
     root = Tk()
     root.geometry("1000x400")
     MainWindow(root, clf, mb, note_sample_window_size)

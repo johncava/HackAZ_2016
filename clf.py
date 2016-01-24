@@ -46,9 +46,6 @@ def listen(clf, mb, window_size_ms):
 		print str(current_notes)
 
 import matplotlib.pyplot as plt
-sig_plot = None
-def init_plots():
-    sig_plot = SignalPlot()
 
 import Queue
 
@@ -56,14 +53,17 @@ plot_buffer = Queue.Queue()
 
 class SignalPlot(object):
 	def __init__(self):
-		self.fig = plt.figure()
-		self.fig, self.axes = plt.subplots(1, 2)
+		plt.ion()
 		plt.show(block=False)
 
 	def update(self, time, freq):
-		self.axes[0].plot(time)
-		self.axes[1].plot(freq)
+		plt.clf()
+		plt.subplot(211)
+		plt.plot(time)
+		plt.subplot(212)
+		plt.plot(freq)
 		plt.draw()
+sig_plot = SignalPlot()
 
 def listen_single(clf, mb, window_size_ms):
 	time_domain, freq_spect = read_temporal_spectral_data_for_time(window_size_ms)
