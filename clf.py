@@ -1,7 +1,7 @@
 #contains all classification routines
 import numpy as np
 from audio import read_spectral_data_for_time
-from multiprocessing import Queue
+import multiprocessing
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.svm import LinearSVC
@@ -34,7 +34,7 @@ def single_key_experiment(window_size_ms, clf, train_time_sec):
 		_label = clf.predict([freq_spect])
 		print 'Predicting class {}'.format(_label[0])
 
-note_buffer = Queue()
+note_buffer = multiprocessing.Queue()
 
 def listen(clf, mb, window_size_ms):
 	while True:
@@ -45,11 +45,35 @@ def listen(clf, mb, window_size_ms):
 			note_buffer.put(note)
 		print str(current_notes)
 
+import matplotlib.pyplot as plt
+import Queue
+
+plotting_enabled = False
+plot_buffer = Queue.Queue()
+
 def listen_single(clf, mb, window_size_ms):
 	freq_spect = read_spectral_data_for_time(window_size_ms)
+	#we have our data, we can plot it if we want
+	if plotting_enabled:
+		plot_buffer.put(freq_spect)
+
 	_label = clf.predict([freq_spect])
 	current_notes = mb.inverse_transform(_label)[0]
 	return current_notes
+
+import time
+def plot_worker():
+	PLOT_REFRESH = 0.01 #10 ms.
+	while True:
+		time.sleep(PLOT_REFRESH)
+		if not plot_buffer.empty():
+			freq_sig = plot_buffer.get()
+			plt.figure(1)
+			plt.clf()
+			#plt.subplot(211)
+			plt.plot(freq_sig)
+			plt.draw()
+		
 """
 INPUT:
 window_size_ms - the sampling window size in ms
@@ -87,7 +111,7 @@ def train(window_size_ms, train_time_sec=30, clf = OneVsRestClassifier(DecisionT
 	clf.fit(X, y)
 	return (clf, mb)
 
-import time
+import time, threading
 if __name__ == '__main__':
 	window_size_ms = 75
 	kwargs = {}
@@ -99,6 +123,9 @@ if __name__ == '__main__':
 		kwargs['n_keys'] = int(sys.argv[3])
 
 	clf, mp = train(window_size_ms, **kwargs)
-	
+
+	plotting_enabled = True
+	plot_thread = threading.Thread(target=plot_worker)
+	plot_thread.start()
 	while True:
 		print listen_single(clf, mp, window_size_ms) 
