@@ -55,7 +55,9 @@ def listen_single(clf, mb, window_size_ms):
 	freq_spect = read_spectral_data_for_time(window_size_ms)
 	#we have our data, we can plot it if we want
 	if plotting_enabled:
-		plot_buffer.put(freq_spect)
+		plt.clf()
+		plt.plot(freq_spect)
+		plt.draw()
 
 	_label = clf.predict([freq_spect])
 	current_notes = mb.inverse_transform(_label)[0]
@@ -125,7 +127,7 @@ if __name__ == '__main__':
 	clf, mp = train(window_size_ms, **kwargs)
 
 	plotting_enabled = True
-	plot_thread = threading.Thread(target=plot_worker)
-	plot_thread.start()
+	plt.show(block=False)
+
 	while True:
 		print listen_single(clf, mp, window_size_ms) 
