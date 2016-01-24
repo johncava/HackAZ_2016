@@ -54,7 +54,6 @@ import Queue
 
 plot_buffer = Queue.Queue()
 
-<<<<<<< HEAD
 class SignalPlot(object):
 	def __init__(self):
 		self.fig = plt.figure()
