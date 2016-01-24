@@ -7,6 +7,7 @@ from Tkinter import Tk, Frame, Canvas, Menu, BOTH
 from clf import train, listen_single
 import sys
 from sklearn.multiclass import OneVsRestClassifier
+import matplotlib.pyplot as plt
 
 LOOP_INTERVAL = 10
 
