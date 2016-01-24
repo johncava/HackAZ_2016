@@ -7,7 +7,6 @@ from Tkinter import Tk, Frame, Canvas, Menu, BOTH
 from clf import train, listen_single
 import sys
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.ensemble.forest import RandomForestClassifier
 
 LOOP_INTERVAL = 10
 
@@ -76,18 +75,15 @@ class ReaderDisplay(Canvas):
             return True
         
         # if this note's values are not a subset of previous set of notes, it's a new note
-        latest_note_time = self.notes[-1].time
-        first_latest_note_index = -1
-        for note in self.notes.reverse():
-            if note.time != latest_note_time:
-                break
-            first_latest_note_index -= 1
-        
-        for note_value in note_values:
-            if not note_value in [note.value for note in self.notes[first_latest_note_index : -1]]:
-                return True
-        
-        return False
+        if len(self.notes) == 0:
+            return True
+        else:
+            latest_note_time = self.notes[-1].time
+            for note in self.notes.reverse():
+                if note.time != latest_note_time:
+                    return False
+                elif not note.value in note_values:
+                    return True
     
     def is_note_continuation(self, note_values):
         # empty tuples represent no baseline, but undefined notes; these are usually notes
@@ -105,7 +101,7 @@ class ReaderDisplay(Canvas):
         
         for note in self.notes:
             note.time += 1
-            
+        
         if self.is_new_note(note_values):
             for note_value in note_values:
                 self.notes.append(Note(note_value))
@@ -130,6 +126,7 @@ def main():
     note_sample_window_size = 75
     training_time = 10
     number_of_keys = 4
+    
     if len(sys.argv) > 1:
         note_sample_window_size = int(sys.argv[1])
     if len(sys.argv) > 2:
