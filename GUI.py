@@ -3,7 +3,7 @@ Created on Jan 23, 2016
 
 @author: connor
 '''
-from Tkinter import *
+from Tkinter import Canvas, Frame, PhotoImage, BOTH, Tk, Menu
 from clf import train, listen_single
 import sys
 from sklearn.multiclass import OneVsRestClassifier
@@ -58,7 +58,7 @@ class ReaderDisplay(Canvas):
 
         # if this note's values are not a subset of previous set of notes, it's a new note
         for note_value in note_values:
-            if not note_values in self.last_note_set:
+            if not note_value in self.last_note_set:
                 return True
         return False
 
