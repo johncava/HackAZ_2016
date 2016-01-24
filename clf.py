@@ -46,6 +46,12 @@ def listen(clf, mb, window_size_ms):
 		print str(current_notes)
 
 import matplotlib.pyplot as plt
+def init_plots():
+    #start matplotlib plots
+    t = range(10)
+    plt.plot(t, t)
+    plt.show(block=False)
+
 import Queue
 
 plot_buffer = Queue.Queue()
