@@ -18,8 +18,7 @@ class Note():
         self.time = time
 
 class ReaderDisplay(Canvas):
-    NOTE_WIDTHS_PER_UPDATE = 0.75    # the number of note widths to shift all the notes every UPDATE_INTERVAL
-    UPDATE_INTERVAL = 100 # milliseconds
+    NOTE_WIDTHS_PER_UPDATE = 0.75    # the number of note widths to shift all the notes every note window
     STAFF_OFFSET = 15 # pixels; the number of pixels between the top staff line and the top of the canvas
     WIDTH = 1000
     HEIGHT = 400
@@ -35,28 +34,12 @@ class ReaderDisplay(Canvas):
         self.mb = mb
         self.note_sample_window_size = note_sample_window_size
         
-        self.render_staff()
-        self.after(ReaderDisplay.UPDATE_INTERVAL, self.update_staff)
+        self.update_staff()
     
     def create_lines(self, LR_margin, top_margin):
         for i in xrange(5):
             y = i * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET
             self.create_line(LR_margin, y + top_margin, self.winfo_width(), y + top_margin)
-        
-    def render_staff(self):
-        # TODO TEMP
-        print "rendering staff..."
-        
-        self.delete("all")
-        
-        self.create_lines(self.LR_OFFSET, self.STAFF_OFFSET)
-
-        for note in self.notes:
-            center_x = round(int(self.WIDTH) - ((note.time + 0.5) * Note.NOTE_WIDTH * ReaderDisplay.NOTE_WIDTHS_PER_UPDATE))
-            center_y = 3.0 * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET + (Note.B3_VALUE - note.value) * Note.NOTE_WIDTH / 2.0
-            
-            self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y - Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y + Note.NOTE_WIDTH / 2 + 1)
-            self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y + Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y - Note.NOTE_WIDTH / 2 - 1)
 
     def is_new_note(self, note_values):
         # notes containing 0 (the baseline) or empty are not new notes
@@ -82,21 +65,36 @@ class ReaderDisplay(Canvas):
             return not self.is_new_note(note_values)
 
     def update_staff(self):
+        # (block and) listen for the next chunk of note data
         note_values = listen_single(self.clf, self.mb, self.note_sample_window_size)
         print note_values
         
+        # shift the old notes
         for note in self.notes:
             note.time += 1
         
+        # filter note data
         if self.is_new_note(note_values) and not self.is_note_continuation(note_values):
             for note_value in note_values:
                 self.notes.append(Note(note_value))
 
-        self.render_staff()
+        # clear the canvas
+        self.delete("all")
+        
+        # render staff lines
+        self.create_lines(self.LR_OFFSET, self.STAFF_OFFSET)
+
+        # render note contents
+        for note in self.notes:
+            center_x = round(int(self.WIDTH) - ((note.time + 0.5) * Note.NOTE_WIDTH * ReaderDisplay.NOTE_WIDTHS_PER_UPDATE))
+            center_y = 3.0 * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET + (Note.B3_VALUE - note.value) * Note.NOTE_WIDTH / 2.0
+            
+            self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y - Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y + Note.NOTE_WIDTH / 2 + 1)
+            self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y + Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y - Note.NOTE_WIDTH / 2 - 1)
         
         self.last_note_set = note_values
         
-        self.after(ReaderDisplay.UPDATE_INTERVAL, self.update_staff)
+        self.after(1, self.update_staff)
         
 
 class MainWindow(Frame):

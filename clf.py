@@ -68,7 +68,7 @@ sig_plot = SignalPlot()
 def listen_single(clf, mb, window_size_ms):
 	time_domain, freq_spect = read_temporal_spectral_data_for_time(window_size_ms)
 
-	sig_plot.update(time_domain, freq_spect)
+	# TODO TEMP CMT sig_plot.update(time_domain, freq_spect)
 	_label = clf.predict([freq_spect])
 	current_notes = mb.inverse_transform(_label)[0]
 	return current_notes
@@ -137,6 +137,6 @@ if __name__ == '__main__':
 	clf, mp = train(window_size_ms, **kwargs)
 
 
-	init_plots()
+def init_plots():
 	while True:
 		print listen_single(clf, mp, window_size_ms) 
