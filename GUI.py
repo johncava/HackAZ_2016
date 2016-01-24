@@ -6,7 +6,6 @@ Created on Jan 23, 2016
 from Tkinter import Tk, Frame, Canvas, Menu, BOTH
 from clf import train, listen_single, init_plots
 import sys
-from sklearn.multiclass import OneVsRestClassifier
 
 LOOP_INTERVAL = 10
 
@@ -51,18 +50,11 @@ class ReaderDisplay(Canvas):
         
         self.delete("all")
         
-        # TODO TEMP
-        print self.winfo_width()
-        
-        self.create_lines(self.LR_OFFSET, self.winfo_height()/2 - 50)
-        # TODO TEMP
-        #if len(self.notes) == 0 or self.notes[-1].time % 3 == 0:
-        #    self.notes.append(Note(Note.B3_VALUE))
-        
+        self.create_lines(self.LR_OFFSET, self.STAFF_OFFSET)
+
         for note in self.notes:
             center_x = round(int(self.WIDTH) - ((note.time + 0.5) * Note.NOTE_WIDTH * ReaderDisplay.NOTE_WIDTHS_PER_UPDATE))
-            #TO DO RENAME PORTION OF THE CENTER_Y OFFSET AS A SCALE OFFSET
-            center_y = 70 + (self.winfo_height()/2) - self.TOP_OFFSET + (5 + note.value - Note.B3_VALUE)  * Note.NOTE_WIDTH / 2
+            center_y = 2.5 * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET + (note.value - Note.B3_VALUE) * Note.NOTE_WIDTH / 2.0
             
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y - Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y + Note.NOTE_WIDTH / 2 + 1)
             self.create_line(center_x - Note.NOTE_WIDTH / 2, center_y + Note.NOTE_WIDTH / 2, center_x + Note.NOTE_WIDTH / 2 + 1, center_y - Note.NOTE_WIDTH / 2 - 1)
@@ -134,7 +126,6 @@ def main():
         training_time = int(sys.argv[2])
     if len(sys.argv) > 3:
         number_of_keys = int(sys.argv[3])
-
 
     # first, run the training function
     (clf, mb) = train(note_sample_window_size, train_time_sec=training_time, n_keys=number_of_keys)
