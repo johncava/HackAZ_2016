@@ -44,7 +44,6 @@ class ReaderDisplay(Canvas):
         self.note_sample_window_size = note_sample_window_size
         
         self.update_staff()
-    
     def create_lines(self, LR_margin, top_margin):
         for i in xrange(5):
             y = i * Note.NOTE_WIDTH + ReaderDisplay.STAFF_OFFSET
