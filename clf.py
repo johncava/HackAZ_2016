@@ -46,29 +46,29 @@ def listen(clf, mb, window_size_ms):
 		print str(current_notes)
 
 import matplotlib.pyplot as plt
+sig_plot = None
 def init_plots():
-    #start matplotlib plots
-    t = range(10)
-    plt.plot(t, t)
-    plt.show(block=False)
+    sig_plot = SignalPlot()
 
 import Queue
 
 plot_buffer = Queue.Queue()
 
-def update_plots(time_domain, freq_spect):
-	#we have our data, we can plot it if we want
-	plt.clf()
-	#plt.subplot(211)
-	plt.plot(freq_spect)
-	#plt.subplot(212)
-	#plt.plot(time_domain)
-	plt.draw()
+class SignalPlot(object):
+	def __init__(self):
+		self.fig = plt.figure()
+		self.fig, self.axes = plt.subplots(1, 2)
+		plt.show(block=False)
+
+	def update(self, time, freq):
+		self.axes[0].plot(time)
+		self.axes[1].plot(freq)
+		plt.draw()
 
 def listen_single(clf, mb, window_size_ms):
 	time_domain, freq_spect = read_temporal_spectral_data_for_time(window_size_ms)
 
-	update_plots(time_domain, freq_spect)
+	sig_plot.update(time_domain, freq_spect)
 	_label = clf.predict([freq_spect])
 	current_notes = mb.inverse_transform(_label)[0]
 	return current_notes
@@ -136,9 +136,7 @@ if __name__ == '__main__':
 
 	clf, mp = train(window_size_ms, **kwargs)
 
-	t = range(10)
-	plt.plot(t, t)
-	plt.show(block=False)
 
+	init_plots()
 	while True:
 		print listen_single(clf, mp, window_size_ms) 
